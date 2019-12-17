@@ -1,5 +1,6 @@
 /*
 Copyright 2017 Google Inc.
+Copyright 2020 Nokia
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -46,6 +47,13 @@ var (
 		"p": "PROTO", "proto": "PROTO", "PROTO": "PROTO",
 		"sp": "SHORTPROTO", "shortproto": "SHORTPROTO", "SHORTPROTO": "SHORTPROTO",
 	}
+	encodingMap = map[string]client.Encoding{
+		"p": client.Proto, "proto": client.Proto, "PROTO": client.Proto,
+		"j": client.Json, "json": client.Json, "JSON": client.Json,
+		"a": client.Ascii, "ascii": client.Ascii, "ASCII": client.Ascii,
+		"b": client.Bytes, "bytes": client.Bytes, "BYTES": client.Bytes,
+		"i": client.JsonIetf, "json_ietf": client.JsonIetf, "JSON_IETF": client.JsonIetf,
+	}
 )
 
 // Config is a type to hold parameters that affect how the cli sends and
@@ -85,6 +93,12 @@ func QueryDisplay(ctx context.Context, query client.Query, cfg *Config) error {
 		return fmt.Errorf("sendQueryAndDisplay(ctx, %+v, %+v):\n\t%v", query, cfg, err)
 	}
 	return nil
+}
+
+// QueryEncoding returns a client encoding value for t after trying aliases for
+// the type.
+func QueryEncoding(t string) client.Encoding {
+	return encodingMap[t]
 }
 
 // ParseSubscribeProto parses given gNMI SubscribeRequest text proto

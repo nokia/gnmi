@@ -1,5 +1,6 @@
 /*
 Copyright 2017 Google Inc.
+Copyright 2020 Nokia
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -87,6 +88,52 @@ var (
 	printableASCII = regexp.MustCompile(`^[\x20-\x7E]*$`).MatchString
 )
 
+type Encoding int
+
+// NewEncoding returns a new Encoding based on the provided string.
+func NewEncoding(s string) Encoding {
+	v, ok := encodingConst[s]
+	if !ok {
+		return Undefined
+	}
+	return v
+}
+
+// String returns the string representation of the QueryType.
+func (q Encoding) String() string {
+	return encodingString[q]
+}
+
+const (
+	// Unknown is an unknown query and should always be treated as an error.
+	Undefined Encoding = iota
+	Proto
+	Json
+	Bytes
+	Ascii
+	JsonIetf
+)
+
+var (
+	encodingString = map[Encoding]string{
+		Undefined: "undefined",
+		Proto:     "proto",
+		Json:      "json",
+		Bytes:     "bytes",
+		Ascii:     "ascii",
+		JsonIetf:  "json_ietf",
+	}
+
+	encodingConst = map[string]Encoding{
+		"undefined": Undefined,
+		"proto":     Proto,
+		"json":      Json,
+		"bytes":     Bytes,
+		"ascii":     Ascii,
+		"json_ietf": JsonIetf,
+	}
+)
+
 // Destination contains data used to connect to a server.
 type Destination struct {
 	// Addrs is a slice of addresses by which a target may be reached. Most
@@ -148,6 +195,8 @@ type Query struct {
 	Queries []Path
 	// Type of query to perform.
 	Type Type
+	// Encoding requested for value attributes returned by the server
+	Encoding Encoding
 	// Timeout is the connection timeout for the query. It will *not* prevent a
 	// slow (or streaming) query from completing, this only affects the initial
 	// connection and broken connection detection.

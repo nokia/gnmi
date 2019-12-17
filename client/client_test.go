@@ -1,5 +1,6 @@
 /*
 Copyright 2017 Google Inc.
+Copyright 2020 Nokia
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -408,6 +409,45 @@ func TestNewType(t *testing.T) {
 		t.Run(tt.desc, func(t *testing.T) {
 			if got := client.NewType(tt.in); got != tt.want {
 				t.Fatalf("client.NewType(%+v) failed: got %v, want %v", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewEncodinbg(t *testing.T) {
+	tests := []struct {
+		desc string
+		in   string
+		want client.Encoding
+	}{{
+		desc: "Undefined",
+		in:   "foo",
+		want: client.Undefined,
+	}, {
+		desc: "Proto",
+		in:   "proto",
+		want: client.Proto,
+	}, {
+		desc: "Json",
+		in:   "json",
+		want: client.Json,
+	}, {
+		desc: "ASCII",
+		in:   "ascii",
+		want: client.Ascii,
+	}, {
+		desc: "Bytes",
+		in:   "bytes",
+		want: client.Bytes,
+	}, {
+		desc: "Json IETF",
+		in:   "json_ietf",
+		want: client.JsonIetf,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			if got := client.NewEncoding(tt.in); got != tt.want {
+				t.Fatalf("client.NewEncoding(%+v) failed: got %v, want %v", tt.in, got, tt.want)
 			}
 		})
 	}

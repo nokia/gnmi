@@ -1,5 +1,6 @@
 /*
 Copyright 2017 Google Inc.
+Copyright 2020 Nokia
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -242,11 +243,28 @@ func getType(t client.Type) gpb.SubscriptionList_Mode {
 	return gpb.SubscriptionList_ONCE
 }
 
+func getEncoding(e client.Encoding) gpb.Encoding {
+	switch e {
+	case client.Proto:
+		return gpb.Encoding_PROTO
+	case client.Json:
+		return gpb.Encoding_JSON
+	case client.Ascii:
+		return gpb.Encoding_ASCII
+	case client.Bytes:
+		return gpb.Encoding_BYTES
+	case client.JsonIetf:
+		return gpb.Encoding_JSON_IETF
+	}
+	return gpb.Encoding_PROTO
+}
+
 func subscribe(q client.Query) (*gpb.SubscribeRequest, error) {
 	s := &gpb.SubscribeRequest_Subscribe{
 		Subscribe: &gpb.SubscriptionList{
-			Mode:   getType(q.Type),
-			Prefix: &gpb.Path{Target: q.Target},
+			Mode:     getType(q.Type),
+			Prefix:   &gpb.Path{Target: q.Target},
+			Encoding: getEncoding(q.Encoding),
 		},
 	}
 	if q.UpdatesOnly {

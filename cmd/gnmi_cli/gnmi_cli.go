@@ -1,5 +1,6 @@
 /*
 Copyright 2017 Google Inc.
+Copyright 2020 Nokia
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -59,10 +60,11 @@ var (
 		os.Stdout.Write(append(b, '\n'))
 	}}
 
-	clientTypes = flags.NewStringList(&cfg.ClientTypes, []string{gclient.Type})
-	queryFlag   = &flags.StringList{}
-	queryType   = flag.String("query_type", client.Once.String(), "Type of result, one of: (o, once, p, polling, s, streaming).")
-	queryAddr   = flags.NewStringList(&q.Addrs, nil)
+	clientTypes   = flags.NewStringList(&cfg.ClientTypes, []string{gclient.Type})
+	queryFlag     = &flags.StringList{}
+	queryType     = flag.String("query_type", client.Once.String(), "Type of result, one of: (o, once, p, polling, s, streaming).")
+	queryAddr     = flags.NewStringList(&q.Addrs, nil)
+	queryEncoding = flag.String("query_encoding", client.Proto.String(), "Requested value encoding in both requests and responses, one of (p, proto, j, json, a, ascii, b, bytes, i, json_ietf)")
 
 	reqProto = flag.String("proto", "", "Text proto for gNMI request.")
 
@@ -109,6 +111,7 @@ func init() {
 	flag.StringVar(&cfg.Delimiter, "d", cfg.Delimiter, "Short for delimiter.")
 	flag.StringVar(&cfg.Timestamp, "ts", cfg.Timestamp, "Short for timestamp.")
 	flag.StringVar(queryType, "qt", *queryType, "Short for query_type.")
+	flag.StringVar(queryEncoding, "qe", *queryEncoding, "Short for query_encoding.")
 	flag.StringVar(&cfg.DisplayType, "dt", cfg.DisplayType, "Short for display_type.")
 	flag.DurationVar(&cfg.StreamingDuration, "sd", cfg.StreamingDuration, "Short for streaming_duration.")
 	flag.DurationVar(&cfg.PollingInterval, "pi", cfg.PollingInterval, "Short for polling_interval.")
@@ -274,6 +277,11 @@ func executeSubscribe(ctx context.Context) error {
 	if q.Type = cli.QueryType(*queryType); q.Type == client.Unknown {
 		return errors.New("--query_type must be one of: (o, once, p, polling, s, streaming)")
 	}
+
+	if q.Encoding = cli.QueryEncoding(*queryEncoding); q.Encoding == client.Undefined {
+		return errors.New("--query_encoding must be one of: (p, proto, j, json, a, ascii, b, bytes, i, json_ietf)")
+	}
+
 	// Parse queryFlag into appropriate format.
 	if len(*queryFlag) == 0 {
 		return errors.New("--query must be set")
